@@ -8,7 +8,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "fast-xml-parser": "^4.3.2",
-    "webtorrent": "^2.1.7",
+    "webtorrent": "^1.9.5",
     "ws": "^8.16.0"
   }
 }

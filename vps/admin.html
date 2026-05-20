@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Anime Magnets</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#12121a;--card:#181824;--border:#252535;--accent:#e8453c;--green:#3ddc84;--gold:#f5c842;--text:#e8e8f0;--muted:#6b6b88}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px 36px;width:360px;max-width:95vw;text-align:center}
+.login-title{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;color:var(--green);margin-bottom:24px;text-transform:uppercase}
+.login-input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:1rem;padding:12px 16px;border-radius:6px;outline:none;margin-bottom:12px;font-family:'Cairo',sans-serif}
+.login-input:focus{border-color:var(--green)}
+.login-btn{width:100%;background:var(--green);color:#0a0a0f;border:none;border-radius:6px;padding:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.login-btn:disabled{opacity:.5}
+.login-error{color:var(--accent);font-size:0.85rem;margin-top:10px;min-height:20px}
+#admin-screen{display:none}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.logo{font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:var(--green)}
+.logout-btn{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:0.75rem;font-family:'Cairo',sans-serif}
+.logout-btn:hover{background:var(--accent);color:#fff}
+main{max-width:1200px;margin:0 auto;padding:20px 24px}
+.season-bar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.season-bar select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:0.85rem;font-family:'Cairo',sans-serif;outline:none;cursor:pointer}
+.season-bar select:focus{border-color:var(--green)}
+.load-btn{background:var(--gold);color:#0a0a0f;border:none;border-radius:6px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:0.85rem;font-family:'Cairo',sans-serif}
+.load-btn:disabled{opacity:.5}
+.anime-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.anime-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.card-header{display:flex;gap:14px;padding:14px;border-bottom:1px solid var(--border)}
+.card-img{width:80px;height:112px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--card)}
+.card-info{flex:1;min-width:0}
+.card-title{font-size:0.8rem;font-weight:700;line-height:1.3;margin-bottom:4px}
+.card-title-jp{font-size:0.6rem;color:var(--muted);margin-bottom:6px}
+.card-stats{display:flex;gap:8px;flex-wrap:wrap;font-size:0.6rem;font-family:'JetBrains Mono',monospace}
+.card-stat{padding:2px 6px;border-radius:3px;border:1px solid var(--border)}
+.card-stat.eps{color:var(--green);border-color:rgba(61,220,132,0.3)}
+.card-stat.score{color:var(--gold);border-color:rgba(245,200,66,0.3)}
+.card-stat.status{color:var(--muted)}
+.card-body{padding:10px 14px 14px;flex:1;display:flex;flex-direction:column}
+.keyword-input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:4px;font-size:0.7rem;font-family:'JetBrains Mono',monospace;outline:none;margin-bottom:8px;direction:ltr;text-align:left}
+.keyword-input:focus{border-color:var(--gold)}
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:4px;margin-bottom:8px}
+.ep-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 2px;border-radius:3px;cursor:pointer;font-size:0.65rem;font-family:'JetBrains Mono',monospace;text-align:center;transition:all .15s}
+.ep-btn:hover{border-color:var(--green);color:var(--green)}
+.ep-btn:disabled{opacity:.4;cursor:default}
+.ep-btn.searching{border-color:var(--gold);color:var(--gold)}
+.day-section-header{grid-column:1/-1;padding:14px 0 6px;font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.15em;color:var(--green);text-transform:uppercase;border-bottom:1px solid var(--border);margin:4px 0 8px}
+.ep-custom-wrap{display:flex;gap:4px;margin-bottom:8px}
+.ep-custom-input{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;width:60px;text-align:center;outline:none}
+.ep-custom-input:focus{border-color:var(--gold)}
+.ep-custom-btn{background:var(--gold);color:#0a0a0f;border:none;border-radius:3px;padding:6px 12px;font-size:0.6rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.results-area{margin-top:4px;max-height:0;overflow:hidden;transition:max-height .3s ease}
+.results-area.open{max-height:600px;overflow-y:auto}
+.result-item{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:7px 9px;margin-bottom:4px;display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.result-title{flex:1;font-size:0.65rem;line-height:1.3;min-width:0;word-break:break-word}
+.result-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:0.5rem;padding:1px 4px;border-radius:2px;border:1px solid}
+.tag-ar{color:var(--green);border-color:rgba(61,220,132,0.3);background:rgba(61,220,132,0.07)}
+.tag-res{color:var(--gold);border-color:rgba(245,200,66,0.3);background:rgba(245,200,66,0.07)}
+.tag-seed{color:var(--muted);border-color:var(--border)}
+.save-btn{background:var(--green);color:#0a0a0f;border:none;border-radius:3px;padding:4px 10px;font-size:0.6rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Cairo',sans-serif;flex-shrink:0}
+.save-btn:disabled{opacity:.4}
+.save-btn.saved{background:#2a6b47;color:#7dffb3}
+.magnet-link{text-decoration:none;font-size:1rem;line-height:1;opacity:.7;transition:opacity .15s}
+.magnet-link:hover{opacity:1}
+.update-all-btn{background:var(--green);color:#0a0a0f;border:none;border-radius:4px;padding:7px 12px;font-size:0.7rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:6px;width:100%}
+.update-all-btn:disabled{opacity:.5;cursor:default}
+.update-progress{font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted);margin-top:4px;text-align:center}
+.no-results{color:var(--muted);font-size:0.65rem;padding:8px;text-align:center}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{text-align:center;padding:40px;color:var(--muted);font-size:0.85rem}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-title">⬡ Admin Access</div>
+    <input id="pw-input" class="login-input" type="password" placeholder="كلمة المرور" autofocus>
+    <button class="login-btn" id="pw-btn">دخول</button>
+    <div class="login-error" id="pw-error"></div>
+  </div>
+</div>
+<div id="admin-screen">
+  <header>
+    <div class="logo">⬡ ANIME MAGNETS ADMIN</div>
+    <button class="logout-btn" id="logout-btn">خروج</button>
+  </header>
+  <main>
+    <div class="season-bar">
+      <select id="season-select">
+        <option value="winter">الشتاء</option>
+        <option value="spring">الربيع</option>
+        <option value="summer">الصيف</option>
+        <option value="fall" selected>الخريف</option>
+      </select>
+      <select id="year-select"></select>
+      <button class="load-btn" id="load-btn">تحميل الأنمي</button>
+    </div>
+    <div class="anime-grid" id="anime-grid"></div>
+  </main>
+</div>
+<script>
+let adminPw = '';
+const months = ['يناير','فبراير','مارس','إبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function tryLogin(pw) {
+  const r = await fetch('/magnets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': pw },
+    body: '{"test":true}',
+  });
+  return r.status !== 401;
+}
+document.getElementById('pw-btn').addEventListener('click', async () => {
+  const pw = document.getElementById('pw-input').value.trim();
+  if (!pw) return;
+  document.getElementById('pw-btn').disabled = true;
+  document.getElementById('pw-btn').innerHTML = 'جارٍ التحقق... <span class="spinner"></span>';
+  const ok = await tryLogin(pw);
+  document.getElementById('pw-btn').disabled = false;
+  document.getElementById('pw-btn').textContent = 'دخول';
+  if (ok) {
+    adminPw = pw;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    loadSeasonal();
+  } else {
+    document.getElementById('pw-error').textContent = 'كلمة المرور خاطئة';
+  }
+});
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('pw-btn').click();
+});
+document.getElementById('logout-btn').addEventListener('click', () => {
+  adminPw = '';
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+});
+
+// ── Season stuff ──────────────────────────────────────────────────────────────
+const yearSel = document.getElementById('year-select');
+const now = new Date();
+for (let y = now.getFullYear(); y >= 2015; y--) {
+  const opt = document.createElement('option');
+  opt.value = y; opt.textContent = y;
+  if (y === now.getFullYear()) opt.selected = true;
+  yearSel.appendChild(opt);
+}
+
+function getSeason() {
+  const m = now.getMonth() + 1;
+  if (m >= 1 && m <= 3) return 'winter';
+  if (m >= 4 && m <= 6) return 'spring';
+  if (m >= 7 && m <= 9) return 'summer';
+  return 'fall';
+}
+document.getElementById('season-select').value = getSeason();
+
+// ── Jikan helper ──────────────────────────────────────────────────────────────
+async function jikanFetch(path, params = {}) {
+  const sleep = ms => new Promise(res => setTimeout(res, ms));
+  const qs = new URLSearchParams(params).toString();
+  const proxyUrl  = `/jikan?path=${encodeURIComponent(path)}${qs ? '&' + qs : ''}`;
+  const directUrl = `https://api.jikan.moe/v4${path}${qs ? '?' + qs : ''}`;
+  for (const url of [proxyUrl, directUrl]) {
+    for (let i = 0; i < 2; i++) {
+      try {
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), 10000);
+        const r = await fetch(url, { signal: ac.signal });
+        clearTimeout(t);
+        if (r.ok) { const j = await r.json(); if (j && j.data) return j; }
+        if (r.status === 429) { await sleep(3000 + i * 1500); continue; }
+        if (r.status >= 500)  { await sleep(2000 + i * 1000); continue; }
+        break;
+      } catch(e) {
+        if (e.name === 'AbortError') throw new Error('Jikan timeout');
+        if (i < 1) await sleep(1500);
+      }
+    }
+  }
+  throw new Error('Jikan unavailable');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const DAY_ORDER = { monday:0, tuesday:1, wednesday:2, thursday:3, friday:4, saturday:5, sunday:6, unknown:7 };
+const DAY_NAMES = { monday:'الاثنين', tuesday:'الثلاثاء', wednesday:'الأربعاء', thursday:'الخميس', friday:'الجمعة', saturday:'السبت', sunday:'الأحد', unknown:'بدون موعد' };
+function getDayKey(a) { return (a.broadcast?.day||'').toLowerCase().replace(/\s/g,'').replace(/s$/,'') || 'unknown'; }
+
+// ── Load seasonal anime ───────────────────────────────────────────────────────
+async function loadSeasonal() {
+  const season = document.getElementById('season-select').value;
+  const year = document.getElementById('year-select').value;
+  const grid = document.getElementById('anime-grid');
+  grid.innerHTML = '<div class="loading-overlay">جارٍ التحميل... <span class="spinner"></span></div>';
+
+  try {
+    let allData = [];
+    for (let page = 1; page <= 2; page++) {
+      const j = await jikanFetch(`/seasons/${year}/${season}`, { limit: 25, page, sfw: 'true' });
+      if (j && j.data && j.data.length) allData = allData.concat(j.data);
+      else break;
+    }
+    // Deduplicate
+    const seen = new Set();
+    allData = allData.filter(a => { if (seen.has(a.mal_id)) return false; seen.add(a.mal_id); return true; });
+    if (!allData.length) { grid.innerHTML = '<div class="no-results">لا توجد نتائج</div>'; return; }
+    renderCards(allData);
+    loadKeywords();
+  } catch(e) {
+    grid.innerHTML = '<div class="no-results">خطأ في التحميل من Jikan</div>';
+  }
+}
+
+document.getElementById('load-btn').addEventListener('click', loadSeasonal);
+
+// ── Render cards ──────────────────────────────────────────────────────────────
+let animeList = [];
+let keywordCache = {}; // mal_id → saved keyword from KV
+
+function renderCards(data) {
+  animeList = data;
+
+  // Group by broadcast day
+  const groups = {};
+  data.forEach(a => {
+    const dk = getDayKey(a);
+    if (!groups[dk]) groups[dk] = [];
+    groups[dk].push(a);
+  });
+  const sortedDays = Object.keys(groups).sort((a,b) => (DAY_ORDER[a] ?? 99) - (DAY_ORDER[b] ?? 99));
+
+  // Check if episodes known
+  function knownEps(a) { const e = a.episodes || a.aired_episodes; return e && e > 0 && e <= 100 ? e : 0; }
+
+  const grid = document.getElementById('anime-grid');
+  grid.innerHTML = sortedDays.map(dk => {
+    const dayName = DAY_NAMES[dk] || dk;
+    const cardsHtml = groups[dk].map(a => {
+      const img = a.images?.jpg?.image_url || '';
+      const title = a.title_english || a.title || '';
+      const titleJp = a.title || '';
+      const eps = knownEps(a);
+      const score = a.score || '';
+      const status = a.status || '';
+      const statusMap = {'currently_airing':'يُعرض','finished_airing':'منتهي','not_yet_aired':'قريباً'};
+      const statusAr = statusMap[status] || status;
+      const kwVal = keywordCache[a.mal_id] || title;
+
+      return `<div class="anime-card" data-mal-id="${a.mal_id}">
+        <div class="card-header">
+          <img class="card-img" src="${img}" alt="" loading="lazy">
+          <div class="card-info">
+            <div class="card-title">${esc(title)}</div>
+            <div class="card-title-jp">${esc(titleJp)}</div>
+            <div class="card-stats">
+              ${eps ? '<span class="card-stat eps">'+eps+' ح</span>' : ''}
+              ${score ? '<span class="card-stat score">★'+score+'</span>' : ''}
+              <span class="card-stat status">${statusAr}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <input class="keyword-input" id="kw-${a.mal_id}" value="${esc(kwVal)}" placeholder="كلمة البحث...">
+          ${eps
+            ? '<div class="ep-grid" id="epgrid-'+a.mal_id+'"></div>'
+            : '<div class="ep-custom-wrap"><input class="ep-custom-input" id="epnum-'+a.mal_id+'" type="number" min="1" max="100" value="12" placeholder="عدد"><button class="ep-custom-btn" data-malid="'+a.mal_id+'">توليد</button></div>'}
+          <div class="results-area" id="results-${a.mal_id}"></div>
+          <button class="update-all-btn" data-malid="${a.mal_id}">⟳ تحديث الكل</button>
+          <div class="update-progress" id="prog-${a.mal_id}"></div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="day-section-header">${esc(dayName)}</div>${cardsHtml}`;
+  }).join('');
+
+  // Populate episode buttons for cards that have known episode count
+  data.forEach(a => {
+    const eps = knownEps(a);
+    const gridEl = document.getElementById('epgrid-' + a.mal_id);
+    if (gridEl && eps) {
+      for (let i = 1; i <= eps; i++) {
+        const ep = String(i).padStart(2, '0');
+        const btn = document.createElement('button');
+        btn.className = 'ep-btn';
+        btn.textContent = ep;
+        btn.addEventListener('click', () => searchEp(a.mal_id, ep, btn));
+        gridEl.appendChild(btn);
+      }
+    }
+    // Save keyword to KV on change
+    const kwInput = document.getElementById('kw-' + a.mal_id);
+    if (kwInput) {
+      kwInput.addEventListener('change', () => {
+        saveKeyword(a.mal_id, kwInput.value);
+      });
+    }
+  });
+
+  // Wire custom ep number "توليد" buttons
+  document.querySelectorAll('.ep-custom-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const malId = parseInt(this.dataset.malid);
+      const inp = document.getElementById('epnum-' + malId);
+      if (!inp) return;
+      const count = parseInt(inp.value) || 12;
+      const gridEl = document.getElementById('epgrid-' + malId);
+      // If ep-grid already exists with buttons, skip
+      if (gridEl && gridEl.children.length > 0) return;
+      // Create ep-grid if missing (replace the custom-wrap)
+      const wrap = inp.closest('.ep-custom-wrap');
+      if (wrap) {
+        const epDiv = document.createElement('div');
+        epDiv.className = 'ep-grid';
+        epDiv.id = 'epgrid-' + malId;
+        wrap.parentNode.replaceChild(epDiv, wrap);
+        for (let i = 1; i <= count; i++) {
+          const ep = String(i).padStart(2, '0');
+          const b = document.createElement('button');
+          b.className = 'ep-btn';
+          b.textContent = ep;
+          b.addEventListener('click', () => searchEp(malId, ep, b));
+          epDiv.appendChild(b);
+        }
+      }
+    });
+  });
+}
+
+// ── Search episode via AnimeTosho ─────────────────────────────────────────────
+async function searchEp(malId, epNum, btn) {
+  const keywordInput = document.getElementById('kw-' + malId);
+  const keyword = keywordInput ? keywordInput.value.trim() : '';
+  if (!keyword) return;
+
+  const resultsArea = document.getElementById('results-' + malId);
+  if (!resultsArea) return;
+
+  // Smart episode number replacement: only replace digits after "E" (e.g., "S04E05" → "S04E01")
+  function applyEpNum(kw, ep) {
+    const m = kw.match(/^(.*E)([0-9]+)$/i);
+    if (m) return m[1] + ep;
+    return kw + ep;
+  }
+  const q = applyEpNum(keyword, epNum);
+
+  // Show results area and loading
+  resultsArea.classList.add('open');
+  resultsArea.innerHTML = '<div style="text-align:center;padding:8px;color:var(--muted);font-size:0.65rem">جارٍ البحث... <span class="spinner"></span></div>';
+
+  // Mark button as searching (don't disable — keep clickable)
+  const card = btn.closest('.anime-card');
+  if (card) card.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('searching'));
+  btn.classList.add('searching');
+
+  try {
+    const r = await fetch(`/tosho?q=${encodeURIComponent(q)}&limit=15`);
+    const j = await r.json();
+    const allItems = (j.ok && j.items) ? j.items : [];
+
+    // Deduplicate by magnet
+    const seen = new Set();
+    const items = allItems.filter(i => {
+      if (!i.magnet || seen.has(i.magnet)) return false;
+      seen.add(i.magnet); return true;
+    });
+
+    // Show only 1080p Arabic-subtitled results (isArabic checks text for [ara, ASS])
+    const arabicItems = items.filter(i => i.isArabic && i.resolution === '1080p');
+
+    if (!arabicItems.length) {
+      resultsArea.innerHTML = '<div class="no-results">لا توجد نتائج بترجمة عربية</div>';
+      return;
+    }
+
+    resultsArea.innerHTML = arabicItems.map((item, idx) => {
+      const sizeMB = item.size > 0 ? (item.size / 1048576).toFixed(0) + ' MB' : '';
+      const magnetLink = item.magnet ? `<a href="${esc(item.magnet)}" class="magnet-link" target="_blank" title="فتح الرابط">🧲</a>` : '';
+      return `<div class="result-item">
+        <div class="result-title">
+          ${esc(item.title)}
+          <div class="result-tags">
+            <span class="tag tag-ar">عربي</span>
+            ${item.resolution ? '<span class="tag tag-res">'+esc(item.resolution)+'</span>' : ''}
+            ${item.seeders > 0 ? '<span class="tag tag-seed">▲'+item.seeders+'</span>' : ''}
+            ${sizeMB ? '<span class="tag tag-seed">'+sizeMB+'</span>' : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          ${magnetLink}
+          <button class="save-btn" data-idx="${idx}">حفظ</button>
+          <button class="nyaa-play-btn" data-magnet="${esc(item.magnet||'')}" data-malid="${malId}" data-ep="${epNum}" title="تشغيل">▶</button>
+          <button class="nyaa-del-btn" data-magnet="${esc(item.magnet||'')}" data-malid="${malId}" data-ep="${epNum}" title="حذف">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Wire save buttons — stay clickable after save
+    resultsArea.querySelectorAll('.save-btn').forEach(saveBtn => {
+      saveBtn.addEventListener('click', async function() {
+        const item = arabicItems[parseInt(this.dataset.idx)];
+        this.disabled = true; this.textContent = 'جارٍ الحفظ...';
+        const { ok, error } = await saveMagnet(malId, keyword, epNum, item);
+        this.disabled = false;
+        if (ok) {
+          this.textContent = '✓ تم';
+          this.classList.add('saved');
+          setTimeout(() => { this.textContent = 'حفظ'; this.classList.remove('saved'); }, 2000);
+        } else {
+          this.textContent = 'خطأ';
+          this.title = error;
+          setTimeout(() => { this.textContent = 'حفظ'; this.title = ''; }, 2500);
+        }
+      });
+    });
+
+  } catch(e) {
+    resultsArea.innerHTML = '<div class="no-results">خطأ: ' + esc(e.message) + '</div>';
+  }
+
+  if (card) card.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('searching'));
+}
+
+// ── Save magnet ───────────────────────────────────────────────────────────────
+async function saveMagnet(malId, keyword, ep, item) {
+  try {
+    const r = await fetch('/magnets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminPw },
+      body: JSON.stringify({
+        mal_id: malId, ep,
+        result: { magnet: item.magnet, title: item.title, resolution: item.resolution, isArabic: true, seeders: item.seeders, subtitleUrl: item.subtitleUrl || '' },
+      }),
+    });
+    const j = await r.json();
+    return { ok: j.ok, error: j.error || '' };
+  } catch (e) { return { ok: false, error: e.message }; }
+}
+
+// ── Keyword persistence in KV ────────────────────────────────────────────────
+async function saveKeyword(malId, kw) {
+  try {
+    await fetch('/magnets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminPw },
+      body: JSON.stringify({ mal_id: malId, keyword: kw }),
+    });
+  } catch {}
+}
+
+async function loadKeywords() {
+  await Promise.allSettled(animeList.map(async a => {
+    try {
+      const r = await fetch(`/magnets?mal_id=${a.mal_id}`);
+      const j = await r.json();
+      if (j.ok && j.keyword) {
+        keywordCache[a.mal_id] = j.keyword;
+        const inp = document.getElementById('kw-' + a.mal_id);
+        if (inp) inp.value = j.keyword;
+      }
+    } catch {}
+  }));
+}
+
+// ── Batch update all episodes for a card ─────────────────────────────────────
+document.getElementById('anime-grid').addEventListener('click', async e => {
+  const btn = e.target.closest('.update-all-btn');
+  if (!btn) return;
+  const malId = parseInt(btn.dataset.malid);
+  if (!malId) return;
+  btn.disabled = true;
+  btn.textContent = 'جارٍ التحديث...';
+  const prog = document.getElementById('prog-' + malId);
+  const inp = document.getElementById('kw-' + malId);
+  if (!inp) { btn.disabled = false; btn.textContent = '⟳ تحديث الكل'; return; }
+
+  const keyword = inp.value.trim();
+  if (!keyword) { btn.disabled = false; btn.textContent = '⟳ تحديث الكل'; return; }
+
+  // Save keyword first
+  await saveKeyword(malId, keyword);
+
+  const anime = animeList.find(a => a.mal_id === malId);
+  let totalEps = anime?.episodes || anime?.aired_episodes || 0;
+  // Fallback: count ep-grid buttons if generated from custom input
+  if (!totalEps) {
+    const epGrid = document.getElementById('epgrid-' + malId);
+    if (epGrid && epGrid.children.length) totalEps = epGrid.children.length;
+  }
+  if (!totalEps) {
+    btn.disabled = false;
+    btn.textContent = '⟳ تحديث الكل';
+    if (prog) prog.textContent = 'عدد الحلقات غير معروف';
+    return;
+  }
+
+  // Load saved episodes from KV
+  let saved = {};
+  try {
+    const r = await fetch(`/magnets?mal_id=${malId}`);
+    const j = await r.json();
+    if (j.ok) saved = j.episodes || {};
+  } catch {}
+
+  let found = 0, missing = 0;
+  for (let ep = 1; ep <= totalEps; ++ep) {
+    const epStr = String(ep).padStart(2, '0');
+    if (saved[epStr]) { found++; continue; }
+    if (prog) prog.textContent = `EP ${epStr}...`;
+    try {
+      const m = keyword.match(/^(.*E)([0-9]+)$/i);
+      const q = m ? m[1] + epStr : keyword + epStr;
+      const r = await fetch(`/tosho?q=${encodeURIComponent(q)}&limit=10`);
+      const j = await r.json();
+      const items = (j.ok && j.items) ? j.items.filter(i => i.magnet && i.resolution === '1080p' && i.isArabic) : [];
+      if (items.length) {
+        items.sort((a,b) => (b.seeders||0) - (a.seeders||0));
+        const best = items[0];
+        await fetch('/magnets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminPw },
+          body: JSON.stringify({
+            mal_id: malId, ep: epStr,
+            result: { magnet: best.magnet, title: best.title, resolution: best.resolution, isArabic: true, seeders: best.seeders, subtitleUrl: best.subtitleUrl || '' },
+          }),
+        });
+        found++;
+      } else {
+        if (prog) prog.textContent = `EP ${epStr} غير متوفر — توقف`;
+        break;
+      }
+    } catch { break; }
+  }
+  btn.disabled = false;
+  btn.textContent = '⟳ تحديث الكل';
+  if (prog) prog.textContent = `تم العثور على ${found} حلقة`;
+});
+</script>
+<!-- VPS Player overlay -->
+<div id="player-overlay"><div id="player-wrap"><button id="player-close">✕</button><video id="player-video" controls autoplay playsinline></video></div><div id="player-status"></div></div>
+<script>
+// ── VPS streaming ──
+const VPS_URL = ''; // Empty = same origin
+function playHls(magnet) {
+  window.open(magnet, '_blank');
+}
+document.getElementById('player-close').addEventListener('click', () => {
+  const v = document.getElementById('player-video'); v.pause(); v.src = '';
+  document.getElementById('player-overlay').classList.remove('open');
+});
+document.addEventListener('click', function(e) {
+  const playBtn = e.target.closest('.nyaa-play-btn');
+  if (playBtn) {
+    const mag = playBtn.dataset.magnet;
+    if (mag) window.open(mag, '_blank');
+    return;
+  }
+  const delBtn = e.target.closest('.nyaa-del-btn');
+  if (delBtn) {
+    if (!confirm('حذف من الخادم؟')) return;
+    const malId = delBtn.dataset.malid, ep = delBtn.dataset.ep;
+    if (!malId || !ep) { if (delBtn.dataset.magnet) window.open(delBtn.dataset.magnet, '_blank'); return; }
+    fetch(`${VPS_URL}/api/episode/${malId}/${ep}`, { method: 'DELETE', headers: { 'X-Admin-Token': adminPw } })
+      .then(r => { if (r.ok) { delBtn.textContent = '✓'; delBtn.style.opacity = '.5'; } })
+      .catch(() => { if (delBtn.dataset.magnet) window.open(delBtn.dataset.magnet, '_blank'); });
+    return;
+  }
+});
+</script>
+</body>
+</html>

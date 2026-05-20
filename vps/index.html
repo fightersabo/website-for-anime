@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Schedule</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4256314122817666"
+     crossorigin="anonymous"></script>
+  <link rel="icon" type="image/png" href="/favicon.png" sizes="48x48">
+<link rel="shortcut icon" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0a0a0f;
+  --surface: #12121a;
+  --card:    #181824;
+  --border:  #252535;
+  --accent:  #e8453c;
+  --accent2: #ff8c42;
+  --gold:    #f5c842;
+  --text:    #e8e8f0;
+  --muted:   #6b6b88;
+  --green:   #3ddc84;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body.ar { direction: rtl; font-family: 'Cairo', sans-serif; }
+body.ar .card-title,
+body.ar .modal-title,
+body.ar .modal-synopsis { font-family: 'Cairo', sans-serif; }
+body.ar .day-tab-full { font-family: 'Cairo', sans-serif; font-size: 0.6rem; }
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,15,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  height: 64px; padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.logo { display: flex; align-items: baseline; gap: 0.5rem; }
+.logo-main { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.08em; }
+.logo-accent { color: var(--accent); }
+.logo-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+
+/* Lang switch */
+.lang-switch { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.lang-btn {
+  background: transparent; border: none; color: var(--muted);
+  font-family: 'Cairo', 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 700;
+  padding: 6px 14px; cursor: pointer; transition: all 0.15s;
+}
+.lang-btn.active { background: var(--accent); color: #fff; }
+.lang-btn:not(.active):hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.lang-sep { width: 1px; background: var(--border); }
+
+.season-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em;
+  padding: 4px 12px; border: 1px solid var(--accent); color: var(--accent);
+  border-radius: 2px; text-transform: uppercase; white-space: nowrap;
+}
+.tz-block { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); text-align: right; line-height: 1.7; }
+.tz-name { color: var(--gold); }
+.live-clock { color: var(--text); font-size: 0.7rem; }
+
+/* ── MAIN ── */
+main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+
+/* Stats */
+.stats-bar {
+  display: flex; gap: 1.5rem; margin-bottom: 1.5rem; padding: 1rem 1.4rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px; flex-wrap: wrap;
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; line-height: 1; }
+.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+.v-div { width: 1px; background: var(--border); align-self: stretch; }
+
+/* Controls */
+.controls { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; align-items: center; }
+.search-wrap { position: relative; flex: 1; min-width: 180px; }
+.search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+#search-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  padding: 9px 12px 9px 36px; border-radius: 3px; outline: none; transition: border-color 0.2s;
+}
+#search-input::placeholder { color: var(--muted); }
+#search-input:focus { border-color: var(--accent); }
+.sort-select {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.8rem; padding: 9px 13px; border-radius: 3px; outline: none; cursor: pointer;
+}
+.refresh-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  padding: 9px 13px; border-radius: 3px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.8rem; transition: all 0.2s;
+}
+.refresh-btn:hover { color: var(--text); border-color: var(--muted); }
+.refresh-btn.spinning svg { animation: spin 0.9s linear infinite; }
+
+/* Day nav */
+.day-nav-wrap { margin-bottom: 1.8rem; display: flex; flex-direction: column; gap: 8px; }
+.day-nav-all { display: flex; }
+.day-btn-all {
+  background: var(--card); border: 2px solid var(--border); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+  padding: 10px 22px; cursor: pointer; border-radius: 6px; transition: all 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.day-btn-all:hover { background: rgba(255,255,255,0.06); border-color: var(--muted); }
+.day-btn-all.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 4px 20px rgba(232,69,60,0.35); }
+.tab-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: rgba(255,255,255,0.12); }
+.day-btn-all.active .tab-count { background: rgba(0,0,0,0.25); }
+.day-nav-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-tab {
+  background: var(--card); border: 2px solid var(--border); color: var(--text);
+  cursor: pointer; border-radius: 8px; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 14px 6px 12px; gap: 5px; position: relative; min-width: 0; overflow: hidden;
+  user-select: none;
+}
+.day-tab:hover { background: rgba(255,255,255,0.06); border-color: var(--muted); transform: translateY(-1px); }
+.day-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 4px 20px rgba(232,69,60,0.35); transform: translateY(-2px); }
+.day-tab.today-day:not(.active) { border-color: var(--gold); background: rgba(245,200,66,0.06); }
+.day-tab.today-day:not(.active) .day-tab-short,
+.day-tab.today-day:not(.active) .day-tab-full,
+.day-tab.today-day:not(.active) .day-tab-count { color: var(--gold); }
+.day-tab.empty { opacity: 0.35; border-style: dashed; }
+.day-tab.empty:hover { opacity: 0.6; transform: none; }
+.day-tab-short { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.08em; line-height: 1; }
+.day-tab-full { font-size: 0.62rem; font-weight: 500; opacity: 0.7; text-align: center; white-space: nowrap; }
+.day-tab.active .day-tab-full { opacity: 0.85; }
+.day-tab-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700;
+  background: rgba(255,255,255,0.1); border-radius: 20px; padding: 2px 8px; min-width: 24px; text-align: center;
+}
+.day-tab.active .day-tab-count { background: rgba(0,0,0,0.25); }
+.today-pill {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  font-size: 0.42rem; font-weight: 900; letter-spacing: 0.1em;
+  padding: 2px 6px; border-radius: 0 0 4px 4px;
+  background: var(--gold); color: #0a0a0f; white-space: nowrap; pointer-events: none;
+}
+.day-tab.active .today-pill { background: rgba(255,255,255,0.9); color: var(--accent); }
+
+/* Loading / Error */
+#loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8rem 2rem; gap: 1.5rem; }
+.loader-ring { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+#error-msg { display: none; text-align: center; padding: 4rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+
+/* Grid */
+#anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+
+/* Card */
+.anime-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  position: relative; display: flex; flex-direction: column;
+}
+.anime-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 40px rgba(232,69,60,0.15); }
+.card-poster { aspect-ratio: 2/3; width: 100%; object-fit: cover; display: block; background: var(--surface); border-radius: 6px 6px 0 0; }
+.card-poster-placeholder { aspect-ratio: 2/3; width: 100%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border-radius: 6px 6px 0 0; }
+.ep-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(10,10,15,0.88); backdrop-filter: blur(4px);
+  border: 1px solid var(--border); border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--accent2);
+  padding: 3px 7px;
+}
+.card-body { padding: 10px 12px 8px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.card-title { font-size: 0.82rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: auto; }
+.score-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 600; padding: 2px 7px; background: rgba(245,200,66,0.08); color: var(--gold); border: 1px solid rgba(245,200,66,0.22); border-radius: 2px; }
+.type-badge  { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; padding: 2px 6px; background: var(--surface); color: var(--muted); border-radius: 2px; }
+.card-time { border-top: 1px solid var(--border); background: var(--surface); padding: 10px 12px 8px; display: flex; flex-direction: column; gap: 6px; }
+.time-row { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.time-day { font-size: 0.72rem; color: var(--muted); }
+.time-val  { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 600; color: var(--accent2); }
+.countdown-wrap { padding-top: 6px; border-top: 1px solid var(--border); }
+.countdown-label { font-family: 'JetBrains Mono', monospace; font-size: 0.52rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+.countdown-timer { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.82rem; color: var(--gold); letter-spacing: 0.06em; }
+.countdown-timer.live { color: var(--green); animation: pulse 1s ease-in-out infinite; }
+.countdown-timer.past { color: var(--muted); font-size: 0.7rem; }
+
+/* Admin: update button & keyword on cards */
+.card-admin-wrap { border-top:1px solid var(--border); padding:8px 12px 10px; gap:6px; flex-direction:column; display:flex; }
+.card-kw-input { background:var(--surface); border:1px solid var(--border); color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.58rem; padding:5px 8px; border-radius:3px; outline:none; }
+.card-kw-input:focus { border-color:var(--green); }
+.card-update-btn { background:var(--green); color:#0a0a0f; border:none; border-radius:3px; padding:6px 10px; font-size:0.6rem; font-weight:700; cursor:pointer; font-family:'Cairo','JetBrains Mono',sans-serif; white-space:nowrap; transition:opacity .15s; }
+.card-update-btn:disabled { opacity:.5; cursor:default; }
+.card-update-progress { font-family:'JetBrains Mono',monospace; font-size:0.52rem; color:var(--muted); }
+
+/* Modal */
+#modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+  z-index: 200; align-items: center; justify-content: center; padding: 1.5rem;
+}
+#modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto;
+  animation: modalIn 0.22s ease; position: relative;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
+#modal-close {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 10;
+}
+#modal-close:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.modal-header { display: flex; gap: 1rem; padding: 1.2rem; border-bottom: 1px solid var(--border); }
+.modal-poster { width: 95px; height: 138px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: var(--surface); }
+.modal-header-info { flex: 1; display: flex; flex-direction: column; gap: 7px; justify-content: center; }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.04em; line-height: 1.2; }
+.modal-title-en { font-size: 0.78rem; color: var(--muted); }
+.modal-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.badge { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; padding: 3px 8px; border-radius: 2px; border: 1px solid; }
+.badge-score { color: var(--gold);    border-color: rgba(245,200,66,0.3);  background: rgba(245,200,66,0.07); }
+.badge-type  { color: var(--muted);   border-color: var(--border);         background: var(--surface); }
+.badge-eps   { color: var(--accent2); border-color: rgba(255,140,66,0.3);  background: rgba(255,140,66,0.07); }
+.badge-rank  { color: #a78bfa;        border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.07); }
+.badge-ep    { color: var(--green);   border-color: rgba(61,220,132,0.3);  background: rgba(61,220,132,0.07); }
+.studio-line { font-size: 0.72rem; color: var(--muted); }
+.modal-body { padding: 1.2rem; display: flex; flex-direction: column; gap: 1.2rem; }
+.section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+.schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.schedule-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; }
+.cell-label { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+.cell-time { font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; font-weight: 600; color: var(--accent2); }
+.cell-day  { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+.modal-countdown { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.modal-countdown-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+.modal-countdown-timer { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 600; color: var(--gold); letter-spacing: 0.08em; }
+.modal-countdown-timer.live { color: var(--green); }
+.modal-countdown-timer.past { color: var(--muted); font-size: 1rem; }
+.genres-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.genre-tag { font-size: 0.72rem; padding: 4px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
+.modal-synopsis { font-size: 0.83rem; color: #b0b0c8; line-height: 1.75; }
+body.ar .modal-synopsis { font-family: 'Cairo', sans-serif; line-height: 2; }
+.mal-link {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--accent);
+  text-decoration: none; font-family: 'JetBrains Mono', monospace;
+  padding: 8px 14px; border: 1px solid var(--accent); border-radius: 3px; transition: all 0.18s;
+}
+.mal-link:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.translating { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+.translate-error { color: var(--accent); font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
+
+/* ── NYAA EPISODE PANEL ── */
+.nyaa-panel {
+  border: 1px solid rgba(61,220,132,0.2); border-radius: 6px;
+  background: var(--surface); overflow: hidden;
+  animation: modalIn 0.18s ease; margin-top: 2px;
+}
+.nyaa-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+  background: rgba(61,220,132,0.04);
+}
+.nyaa-panel-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.08em; color: var(--green); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 65%;
+}
+.nyaa-status {
+  padding: 16px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; color: var(--muted); text-align: center;
+}
+
+/* Episode grid — compact tiles */
+.nyaa-ep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 6px; padding: 10px;
+  max-height: 340px; overflow-y: auto;
+}
+.nyaa-ep-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 5px;
+  padding: 8px 7px 7px; display: flex; flex-direction: column; gap: 5px;
+  transition: border-color 0.15s;
+  min-height: 72px;
+}
+.nyaa-ep-card.has-result  { border-color: rgba(61,220,132,0.35); }
+.nyaa-ep-card.no-result   { opacity: 0.4; }
+
+.nyaa-ep-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700;
+  color: var(--text); letter-spacing: 0.05em;
+}
+.nyaa-ep-status { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-end; }
+.nyaa-ep-status.loading { align-items: center; justify-content: center; }
+
+/* Loading dots animation */
+.nyaa-dots { color: var(--muted); font-size: 0.8rem; animation: pulse 1.2s ease-in-out infinite; letter-spacing: 3px; }
+
+.nyaa-ep-tags { display: flex; gap: 3px; flex-wrap: wrap; }
+.nyaa-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.48rem;
+  padding: 1px 4px; border-radius: 2px; border: 1px solid; white-space: nowrap;
+}
+.nyaa-tag-ar  { color: var(--green);   border-color: rgba(61,220,132,0.35);  background: rgba(61,220,132,0.08); }
+.nyaa-tag-res { color: var(--accent2); border-color: rgba(255,140,66,0.35);  background: rgba(255,140,66,0.08); }
+
+.nyaa-ep-btns { display: flex; gap: 3px; }
+.nyaa-magnet-open, .nyaa-magnet-copy {
+  flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  padding: 4px 4px; border-radius: 3px; border: 1px solid; cursor: pointer;
+  text-align: center; text-decoration: none; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  white-space: nowrap;
+}
+.nyaa-magnet-open {
+  color: var(--green); border-color: rgba(61,220,132,0.4); background: rgba(61,220,132,0.07);
+}
+.nyaa-magnet-open:hover { background: var(--green); color: #0a0a0f; }
+.nyaa-magnet-copy {
+  color: var(--muted); border-color: var(--border); background: transparent;
+}
+.nyaa-magnet-copy:hover { color: var(--text); border-color: var(--muted); }
+
+/* VPS play + delete buttons */
+.nyaa-play-btn {
+  flex-shrink:0; background:var(--green); color:#0a0a0f; border:none;
+  border-radius:3px; padding:4px 8px; cursor:pointer; font-size:0.55rem;
+  font-weight:700; transition:all .15s; white-space:nowrap;
+}
+.nyaa-play-btn:hover { opacity:.85; }
+.nyaa-play-btn.loading { opacity:.6; pointer-events:none; }
+.nyaa-play-btn.done { background:var(--accent); color:#fff; }
+.nyaa-del-btn {
+  flex-shrink:0; background:transparent; color:var(--accent);
+  border:1px solid rgba(232,69,60,0.3); border-radius:3px;
+  padding:4px 6px; cursor:pointer; font-size:0.5rem; transition:all .15s;
+}
+.nyaa-del-btn:hover { background:var(--accent); color:#fff; }
+.nyaa-progress {
+  font-size:0.48rem; color:var(--green); font-family:'JetBrains Mono',monospace;
+  padding:2px 0; min-height:16px;
+}
+/* Player overlay */
+#player-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#player-overlay.open{display:flex}
+#player-wrap{position:relative;width:100%;max-width:960px;background:#000;border-radius:8px;overflow:hidden}
+#player-video{width:100%;max-height:80vh;display:block}
+#player-close{position:absolute;top:10px;right:10px;z-index:10;background:rgba(0,0,0,0.6);color:#fff;border:1px solid rgba(255,255,255,0.2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+#player-status{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.6rem;margin-top:8px;text-align:center}
+
+/* Fetch-on-click button */
+.nyaa-ep-fetch-btn {
+  width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  padding: 5px 4px; border-radius: 3px; border: 1px dashed var(--border);
+  color: var(--muted); background: transparent; cursor: pointer;
+  transition: all 0.15s; text-align: center;
+}
+.nyaa-ep-fetch-btn:hover { border-color: var(--green); color: var(--green); }
+
+.empty-state { text-align: center; padding: 5rem 2rem; color: var(--muted); }
+.empty-big { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--border); display: block; margin-bottom: 1rem; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 700px) {
+  header { padding: 0 1rem; flex-wrap: wrap; height: auto; padding: 10px 1rem; }
+  main { padding: 1rem; }
+  .day-nav-days { gap: 4px; }
+  .day-tab { padding: 10px 3px 9px; }
+  .day-tab-full { display: none; }
+  .schedule-grid { grid-template-columns: 1fr; }
+  #anime-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-main">ANIME<span class="logo-accent">NOW</span></span>
+    <span class="logo-sub" id="logo-sub">// Season Tracker</span>
+  </div>
+  <div class="header-right">
+    <div class="lang-switch">
+      <button class="lang-btn active" id="btn-en">EN</button>
+      <div class="lang-sep"></div>
+      <button class="lang-btn" id="btn-ar">عربي</button>
+    </div>
+    <div class="season-badge" id="season-label">…</div>
+    <div class="tz-block">
+      <span class="tz-name" id="tz-name">Local</span><br>
+      <span class="live-clock" id="live-clock"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="stats-bar" id="stats-bar" style="display:none">
+    <div class="stat"><span class="stat-val" id="stat-total">0</span><span class="stat-label" id="lbl-total">Total</span></div>
+    <div class="v-div"></div>
+    <div class="stat"><span class="stat-val" id="stat-showing">0</span><span class="stat-label" id="lbl-showing">Showing</span></div>
+    <div class="v-div"></div>
+    <div class="stat"><span class="stat-val" id="stat-airing">0</span><span class="stat-label" id="lbl-airing">Airing Soon</span></div>
+    <div class="v-div"></div>
+    <div class="stat" style="margin-left:auto">
+      <span class="stat-val" id="stat-avg" style="font-size:1.2rem;padding-top:4px">—</span>
+      <span class="stat-label" id="lbl-avg">Avg Score</span>
+    </div>
+  </div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="search-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Search anime…">
+    </div>
+    <select class="sort-select" id="sort-select">
+      <option value="time">Sort by Time</option>
+      <option value="score">Sort by Score</option>
+      <option value="title">Sort by Title</option>
+      <option value="rank">Sort by Rank</option>
+    </select>
+    <button class="refresh-btn" id="refresh-btn" style="display:none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span id="lbl-refresh">Refresh</span>
+    </button>
+    <button class="refresh-btn" id="admin-logout-btn" style="display:none;border-color:var(--accent);color:var(--accent)">
+      ✕ Admin
+    </button>
+  </div>
+
+  <div class="day-nav-wrap" id="day-nav" style="display:none">
+    <div class="day-nav-all" id="day-nav-all"></div>
+    <div class="day-nav-days" id="day-nav-days"></div>
+  </div>
+
+  <div id="loading">
+    <div class="loader-ring"></div>
+    <div class="loader-text" id="loader-text">FETCHING SEASONAL ANIME…</div>
+  </div>
+
+  <div id="error-msg">
+    <div>⚠ Failed to load anime data</div>
+    <small style="color:var(--muted);display:block;margin:8px 0">Check your connection and try again</small>
+    <button class="refresh-btn" id="try-again-btn" style="margin:8px auto">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Try Again
+    </button>
+  </div>
+
+  <div id="anime-grid"></div>
+</main>
+
+<div id="modal-overlay">
+  <div class="modal">
+    <button id="modal-close">✕</button>
+    <div id="modal-inner"></div>
+  </div>
+</div>
+
+<!-- Player overlay -->
+<!-- Admin login modal — in DOM before script runs -->
+<div id="admin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 28px;width:320px;max-width:90vw;text-align:center;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;color:var(--green);margin-bottom:20px">⬡ ADMIN ACCESS</div>
+    <input id="admin-pw-input" type="password" placeholder="Password"
+      style="width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.85rem;padding:10px 14px;border-radius:5px;outline:none;margin-bottom:10px;">
+    <div id="admin-pw-error" style="color:var(--accent);font-size:0.7rem;min-height:18px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;"></div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button id="admin-pw-submit" style="background:var(--green);color:#0a0a0f;border:none;border-radius:5px;padding:9px 22px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;cursor:pointer;font-weight:700;">دخول</button>
+      <button id="admin-pw-cancel" style="background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:9px 16px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;cursor:pointer;">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const SEVEN_DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+const DAY_EN = { monday:'Monday',tuesday:'Tuesday',wednesday:'Wednesday',thursday:'Thursday',friday:'Friday',saturday:'Saturday',sunday:'Sunday' };
+const DAY_AR = { monday:'الاثنين',tuesday:'الثلاثاء',wednesday:'الأربعاء',thursday:'الخميس',friday:'الجمعة',saturday:'السبت',sunday:'الأحد' };
+const DAY_SHORT_EN = { monday:'Mon',tuesday:'Tue',wednesday:'Wed',thursday:'Thu',friday:'Fri',saturday:'Sat',sunday:'Sun' };
+const DAY_SHORT_AR = { monday:'إثنين',tuesday:'ثلاثاء',wednesday:'أربعاء',thursday:'خميس',friday:'جمعة',saturday:'سبت',sunday:'أحد' };
+
+const SEASONS = { 1:'WINTER',2:'WINTER',3:'SPRING',4:'SPRING',5:'SPRING',6:'SUMMER',7:'SUMMER',8:'SUMMER',9:'FALL',10:'FALL',11:'FALL',12:'WINTER' };
+const SEASONS_AR = { WINTER:'شتاء',SPRING:'ربيع',SUMMER:'صيف',FALL:'خريف' };
+
+const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const localTZName = (() => {
+  try { return new Intl.DateTimeFormat('en-US',{timeZoneName:'short'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName').value; }
+  catch(e) { return 'Local'; }
+})();
+
+// ── State ────────────────────────────────────────────────────────────────────
+let allAnime   = [];
+let currentDay = 'all';
+let searchQ    = '';
+let sortMode   = 'time';
+let lang       = localStorage.getItem('animeLang') || 'en';
+let cdInterval = null, modalCdInterval = null;
+const txCache  = {}; // malId → { genres:[], synopsis:'' }
+
+// ── UI Labels ────────────────────────────────────────────────────────────────
+const LABELS = {
+  en: {
+    sub:'// Season Tracker', loading:'FETCHING SEASONAL ANIME…',
+    total:'Total', showing:'Showing', airing:'Airing Soon', avg:'Avg Score',
+    search:'Search anime…', refresh:'Refresh',
+    sortTime:'Sort by Time', sortScore:'Sort by Score', sortTitle:'Sort by Title', sortRank:'Sort by Rank',
+    all:'All', today:'TODAY',
+    nextEp:'Next Ep In', studio:'Studio', schedule:'Broadcast Schedule',
+    countdown:'Countdown', timeLeft:'Time remaining',
+    genres:'Genres', synopsis:'Synopsis', viewMal:'↗ View on MyAnimeList',
+    epAired:'aired', epsTotal:'eps total', epsUnk:'? eps', day:'Day', time:'Time',
+    noAnime:'No anime found', onAir:'● ON AIR NOW', airingSoon:'● AIRING SOON',
+    airedAgo:'Aired', hAgo:'h', mAgo:'m', ago:'ago', noSched:'No schedule',
+    translating:'Translating…',
+    nyaaSearch:'Search Episodes on Nyaa',
+    nyaaEpFilter:'EP #', nyaaCat:'Category',
+    nyaaSearchBtn:'Search', nyaaSearching:'Searching nyaa.si…',
+    nyaaNoResults:'No results found on Nyaa',
+    nyaaErr:'Nyaa search failed',
+    nyaaEn:'EN Subtitled', nyaaRaw:'Raw (Japanese)', nyaaSorted:'Sorted by seeders',
+    nyaaCopy:'Copy Magnet', nyaaCopied:'Copied!', nyaaOpen:'Open Magnet',
+    nyaaTrusted:'Trusted', nyaaLoadMore:'Load more…',
+    nyaaEpLabel:'EP', nyaaSeed:'S', nyaaLeech:'L',
+  },
+  ar: {
+    sub:'// متابعة الموسم', loading:'جارٍ تحميل الأنمي الموسمي…',
+    total:'إجمالي الأنمي', showing:'معروض', airing:'يُبث قريبًا', avg:'متوسط التقييم',
+    search:'ابحث عن أنمي…', refresh:'تحديث',
+    sortTime:'ترتيب حسب الوقت', sortScore:'ترتيب حسب التقييم', sortTitle:'ترتيب حسب الاسم', sortRank:'ترتيب حسب المرتبة',
+    all:'الكل', today:'اليوم',
+    nextEp:'الحلقة القادمة', studio:'الاستوديو', schedule:'جدول البث',
+    countdown:'العدّ التنازلي', timeLeft:'الوقت المتبقي',
+    genres:'التصنيفات', synopsis:'القصة', viewMal:'↗ عرض في MyAnimeList',
+    epAired:'بُثّت', epsTotal:'حلقة إجمالًا', epsUnk:'؟ حلقة', day:'اليوم', time:'الوقت',
+    noAnime:'لا يوجد أنمي', onAir:'● يُبث الآن', airingSoon:'● يُبث قريبًا',
+    airedAgo:'بُثّ منذ', hAgo:'س', mAgo:'د', ago:'', noSched:'لا يوجد جدول',
+    translating:'جارٍ الترجمة…',
+    nyaaSearch:'ابحث عن حلقات في Nyaa',
+    nyaaEpFilter:'حلقة #', nyaaCat:'الفئة',
+    nyaaSearchBtn:'بحث', nyaaSearching:'جارٍ البحث في nyaa.si…',
+    nyaaNoResults:'لا توجد نتائج في Nyaa',
+    nyaaErr:'فشل البحث في Nyaa',
+    nyaaEn:'مترجمة للإنجليزية', nyaaRaw:'نسخة يابانية أصلية', nyaaSorted:'مرتبة حسب السيدرز',
+    nyaaCopy:'نسخ المغناطيس', nyaaCopied:'تم النسخ!', nyaaOpen:'فتح المغناطيس',
+    nyaaTrusted:'موثوق', nyaaLoadMore:'تحميل المزيد…',
+    nyaaEpLabel:'حلقة', nyaaSeed:'بذرة', nyaaLeech:'ل',
+  }
+};
+function L(k) { return (LABELS[lang]||LABELS.en)[k] || k; }
+function dayFull(d)  { return (lang==='ar' ? DAY_AR : DAY_EN)[d] || d; }
+function dayShort(d) { return (lang==='ar' ? DAY_SHORT_AR : DAY_SHORT_EN)[d] || d; }
+
+// ── Clock ─────────────────────────────────────────────────────────────────────
+document.getElementById('tz-name').textContent = localTZName;
+function tickClock() {
+  document.getElementById('live-clock').textContent =
+    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+tickClock(); setInterval(tickClock, 1000);
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function todayJstKey() {
+  return new Date().toLocaleDateString('en-US',{weekday:'long',timeZone:'Asia/Tokyo'}).toLowerCase();
+}
+function getDayKey(a) {
+  return (a.broadcast?.day||'').toLowerCase().replace(/\s/g,'').replace(/s$/,'') || 'unknown';
+}
+function getJstTime(a) { return a.broadcast?.time || ''; }
+function isR18(a) {
+  if (a.rating && /^Rx/i.test(a.rating)) return true;
+  return [...(a.genres||[]),...(a.explicit_genres||[])].some(g=>['hentai','erotica'].includes((g.name||'').toLowerCase()));
+}
+
+// ── JST → Local conversion ────────────────────────────────────────────────────
+function convertBC(dayKey, jstTime) {
+  const FAIL = { localTime:'', localDay:'', localDayShort:'', nextAirUTC:null };
+  if (!jstTime) return FAIL;
+  const WDAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const dayIdx = WDAYS.indexOf(dayKey);
+  const [h,m]  = jstTime.split(':').map(Number);
+  if (isNaN(h)||isNaN(m)) return FAIL;
+
+  const jstNow = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));
+  const target = new Date(jstNow);
+  target.setHours(h,m,0,0);
+  if (dayIdx !== -1) {
+    let diff = dayIdx - jstNow.getDay();
+    if (diff < 0) diff += 7;
+    if (diff === 0 && target <= jstNow) diff = 7;
+    target.setDate(target.getDate() + diff);
+  }
+  const utc = new Date(Date.UTC(target.getFullYear(),target.getMonth(),target.getDate(),h-9,m,0));
+  return {
+    localTime:     utc.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:localTZ}),
+    localDay:      utc.toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{weekday:'long',timeZone:localTZ}),
+    localDayShort: utc.toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{weekday:'short',timeZone:localTZ}),
+    nextAirUTC:    utc,
+  };
+}
+
+// ── Countdown string ──────────────────────────────────────────────────────────
+function cdStr(utc) {
+  if (!utc) return { text:L('noSched'), cls:'past' };
+  const diff = utc - Date.now();
+  if (diff < 0) {
+    const ago = -diff;
+    if (ago < 3600000) return { text:L('onAir'), cls:'live' };
+    const h=Math.floor(ago/3600000), mn=Math.floor((ago%3600000)/60000);
+    return { text:`${L('airedAgo')} ${h}${L('hAgo')} ${mn}${L('mAgo')} ${L('ago')}`.trim(), cls:'past' };
+  }
+  if (diff < 1800000) return { text:L('airingSoon'), cls:'live' };
+  const s=Math.floor(diff/1000), d=Math.floor(s/86400), hr=Math.floor((s%86400)/3600), mn=Math.floor((s%3600)/60), sc=s%60;
+  if (d>0) return { text:`${d}d ${String(hr).padStart(2,'0')}h ${String(mn).padStart(2,'0')}m`, cls:'' };
+  return { text:`${String(hr).padStart(2,'0')}:${String(mn).padStart(2,'0')}:${String(sc).padStart(2,'0')}`, cls: hr===0&&mn<30?'live':'' };
+}
+
+// ── Anime cache (localStorage) ───────────────────────────────────────────────
+const CACHE_KEY = 'animenow_seasonal';
+const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours in ms
+
+function cacheLoad() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null; // stale
+    return data;
+  } catch(_) { return null; }
+}
+
+function cacheSave(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
+}
+
+function cacheForceLoad() {
+  // Load even if stale — used when API is down
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw).data || null;
+  } catch(_) { return null; }
+}
+
+// ── Fetch seasonal anime ──────────────────────────────────────────────────────
+async function jikanGet(path, params = {}) {
+  const sleep = ms => new Promise(res => setTimeout(res, ms));
+  const qs    = new URLSearchParams(params).toString();
+
+  // Always try our server-side proxy first — it sets User-Agent + tries mirrors
+  const proxyUrl  = `/jikan?path=${encodeURIComponent(path)}${qs ? '&' + qs : ''}`;
+  // Direct fallback (browser can't set User-Agent but worth trying)
+  const directUrl = `https://api.jikan.moe/v4${path}${qs ? '?' + qs : ''}`;
+
+  for (const url of [proxyUrl, directUrl]) {
+    for (let i = 0; i < 2; i++) {
+      try {
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), 10000);
+        const r = await fetch(url, { signal: ac.signal });
+        clearTimeout(t);
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.data) return j;
+        }
+        if (r.status === 429) { await sleep(3000 + i * 1500); continue; }
+        if (r.status >= 500)  { await sleep(2000 + i * 1000); continue; }
+        break;
+      } catch(e) {
+        if (e.name === 'AbortError') throw new Error('Jikan timeout');
+        if (i < 1) await sleep(1500);
+      }
+    }
+  }
+  throw new Error('Jikan unavailable');
+}
+
+async function fetchFromApi() {
+  let all=[], page=1, last=1;
+  do {
+    const j = await jikanGet('/seasons/now', { limit: 25, page });
+    if (!j || !j.data) throw new Error('Bad Jikan response');
+    all.push(...j.data);
+    last = j.pagination?.last_visible_page ?? 1;
+    page++;
+    if (page<=last && page<=6) await new Promise(res=>setTimeout(res,900));
+  } while (page<=last && page<=6);
+
+  const seen = new Set();
+  return all.filter(a => {
+    if (seen.has(a.mal_id)) return false;
+    seen.add(a.mal_id);
+    return a.airing === true && !isR18(a);
+  });
+}
+
+async function fetchSeasonal() {
+  // 1. Return fresh cache instantly — no API call
+  const cached = cacheLoad();
+  if (cached && cached.length) {
+    console.log(`[cache] serving ${cached.length} anime from localStorage`);
+    // Refresh in background silently so next visit is fresh
+    fetchFromApi().then(fresh => { if (fresh.length) cacheSave(fresh); }).catch(()=>{});
+    return cached;
+  }
+
+  // 2. Cache is missing or stale — fetch from API
+  console.log('[cache] miss — fetching from Jikan');
+  try {
+    const data = await fetchFromApi();
+    if (data.length) cacheSave(data);
+    return data;
+  } catch(e) {
+    // 3. API is down — serve stale cache rather than blank screen
+    const stale = cacheForceLoad();
+    if (stale && stale.length) {
+      console.warn('[cache] API failed, serving stale cache:', e.message);
+      return stale;
+    }
+    throw e; // nothing at all — show error
+  }
+}
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+function getFiltered() {
+  return allAnime
+    .filter(a => {
+      const matchDay = currentDay==='all' || getDayKey(a)===currentDay;
+      const title = ((a.title||'')+' '+(a.title_english||'')).toLowerCase();
+      return matchDay && (!searchQ || title.includes(searchQ));
+    })
+    .sort((a,b) => {
+      if (sortMode==='score') return (b.score||0)-(a.score||0);
+      if (sortMode==='title') return (a.title||'').localeCompare(b.title||'');
+      if (sortMode==='rank')  return (a.rank||9999)-(b.rank||9999);
+      const ta=getJstTime(a)||'99:99', tb=getJstTime(b)||'99:99';
+      return ta.localeCompare(tb);
+    });
+}
+
+function buildGenreHtml(list) {
+  return list.map(g=>`<span class="genre-tag">${esc(g)}</span>`).join('');
+}
+
+// ── Render grid ───────────────────────────────────────────────────────────────
+function renderGrid() {
+  if (cdInterval) { clearInterval(cdInterval); cdInterval=null; }
+  const grid = document.getElementById('anime-grid');
+  const list = getFiltered();
+  document.getElementById('stat-showing').textContent = list.length;
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="empty-big">404</span>${L('noAnime')}</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(anime => {
+    const dk  = getDayKey(anime);
+    const jt  = getJstTime(anime);
+    const bc  = convertBC(dk, jt);
+    const ep  = anime.aired_episodes ?? null;
+    const tot = anime.episodes ?? null;
+    const img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
+    const score = anime.score ? anime.score.toFixed(1) : '—';
+    const ts    = bc.nextAirUTC ? bc.nextAirUTC.getTime() : '';
+    const epLabel = ep!=null ? `EP ${ep}${tot?'/'+tot:''}` : (tot?`EP ?/${tot}`:'');
+    const dayDisp = bc.localDayShort || '';
+
+    return `<div class="anime-card" data-malid="${anime.mal_id}">
+      ${img?`<img class="card-poster" src="${esc(img)}" alt="${esc(anime.title)}" loading="lazy" onerror="this.style.display='none'">`:`<div class="card-poster-placeholder">🎌</div>`}
+      ${epLabel?`<div class="ep-badge">${epLabel}</div>`:''}
+      <div class="card-body">
+        <div class="card-title">${esc(anime.title)}</div>
+        <div class="card-meta">
+          <span class="score-badge">★ ${score}</span>
+          ${anime.type?`<span class="type-badge">${esc(anime.type)}</span>`:''}
+        </div>
+      </div>
+      <div class="card-time">
+        <div class="time-row">
+          <span class="time-day">${dayDisp}</span>
+          <span class="time-val">${bc.localTime||'—'}</span>
+        </div>
+        ${ts?`<div class="countdown-wrap"><div class="countdown-label">${L('nextEp')}</div><div class="countdown-timer" data-ts="${ts}">—</div></div>`:''}
+      </div>
+      <div class="card-admin-wrap" data-malid="${anime.mal_id}">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="card-kw-input" id="kwi-${anime.mal_id}" value="${esc(anime.title)}" placeholder="keyword..." style="flex:1;min-width:0">
+          <button class="card-update-btn" data-malid="${anime.mal_id}">⟳ تحديث</button>
+        </div>
+        <div class="card-update-progress" id="prog-${anime.mal_id}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  function tick() {
+    document.querySelectorAll('.countdown-timer[data-ts]').forEach(el => {
+      const {text,cls} = cdStr(new Date(+el.dataset.ts));
+      el.textContent = text; el.className='countdown-timer '+cls;
+    });
+  }
+  tick(); cdInterval = setInterval(tick, 1000);
+}
+
+// ── Render day nav ────────────────────────────────────────────────────────────
+function renderDayNav() {
+  const today  = todayJstKey();
+  const counts = {};
+  allAnime.forEach(a => { const d=getDayKey(a); counts[d]=(counts[d]||0)+1; });
+
+  // All button
+  const allDiv = document.getElementById('day-nav-all');
+  allDiv.innerHTML = `<button class="day-btn-all ${currentDay==='all'?'active':''}" id="all-day-btn">
+    ${L('all')} <span class="tab-count">${allAnime.length}</span>
+  </button>`;
+  document.getElementById('all-day-btn').addEventListener('click', () => setDay('all'));
+
+  // 7 day tabs
+  const daysDiv = document.getElementById('day-nav-days');
+  daysDiv.innerHTML = SEVEN_DAYS.map(d => {
+    const isToday = d === today;
+    const cnt     = counts[d] || 0;
+    const isEmpty = cnt === 0;
+    const cls = ['day-tab', currentDay===d?'active':'', isToday?'today-day':'', isEmpty?'empty':''].filter(Boolean).join(' ');
+    const todayPill = isToday ? `<span class="today-pill">${L('today')}</span>` : '';
+    return `<button class="${cls}" data-day="${d}">
+      ${todayPill}
+      <span class="day-tab-short">${dayShort(d)}</span>
+      <span class="day-tab-full">${dayFull(d)}</span>
+      <span class="day-tab-count">${cnt||'—'}</span>
+    </button>`;
+  }).join('');
+
+  daysDiv.querySelectorAll('.day-tab').forEach(btn => {
+    btn.addEventListener('click', () => setDay(btn.dataset.day));
+  });
+}
+
+function setDay(d) {
+  currentDay = d;
+  renderDayNav();
+  renderGrid();
+}
+
+// ── Apply language ────────────────────────────────────────────────────────────
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
+  document.body.className = lang;
+
+  document.getElementById('logo-sub').textContent    = L('sub');
+  document.getElementById('loader-text').textContent = L('loading');
+  document.getElementById('lbl-total').textContent   = L('total');
+  document.getElementById('lbl-showing').textContent = L('showing');
+  document.getElementById('lbl-airing').textContent  = L('airing');
+  document.getElementById('lbl-avg').textContent     = L('avg');
+  document.getElementById('lbl-refresh').textContent = L('refresh');
+
+  const si = document.getElementById('search-input');
+  if (si) si.placeholder = L('search');
+
+  const ss = document.getElementById('sort-select');
+  if (ss) { ss.options[0].text=L('sortTime'); ss.options[1].text=L('sortScore'); ss.options[2].text=L('sortTitle'); ss.options[3].text=L('sortRank'); }
+
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.getElementById('btn-ar').classList.toggle('active', lang==='ar');
+
+  if (allAnime.length) { renderDayNav(); renderGrid(); }
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('animeLang', l);
+  Object.keys(txCache).forEach(k => delete txCache[k]); // clear cache on lang change
+  applyLang();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+async function openModal(malId) {
+  if (modalCdInterval) { clearInterval(modalCdInterval); modalCdInterval=null; }
+  const anime = allAnime.find(a => a.mal_id === malId);
+  if (!anime) return;
+
+  const dk  = getDayKey(anime);
+  const bc  = convertBC(dk, getJstTime(anime));
+  const ep  = anime.aired_episodes ?? null;
+  const tot = anime.episodes ?? null;
+  const img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
+
+  const rawGenres   = (anime.genres||[]).map(g=>g.name);
+  const rawSynopsis = (anime.synopsis||'').replace(/\[Written by.*?\]/g,'').trim();
+  const studios     = (anime.studios||[]).map(s=>s.name).join(', ') || '—';
+  const score       = anime.score ? anime.score.toFixed(1) : '—';
+
+  const epBadge = ep!=null ? `<span class="badge badge-ep">EP ${ep} ${L('epAired')}</span>` : '';
+  const totBadge = tot ? `<span class="badge badge-eps">${tot} ${L('epsTotal')}</span>` : `<span class="badge badge-eps">${L('epsUnk')}</span>`;
+
+  document.getElementById('modal-inner').innerHTML = `
+    <div class="modal-header">
+      ${img?`<img class="modal-poster" src="${esc(img)}" alt="${esc(anime.title)}">`:''}
+      <div class="modal-header-info">
+        <div class="modal-title">${esc(anime.title)}</div>
+        ${anime.title_english&&anime.title_english!==anime.title?`<div class="modal-title-en">${esc(anime.title_english)}</div>`:''}
+        <div class="modal-badges">
+          <span class="badge badge-score">★ ${score}</span>
+          ${anime.type?`<span class="badge badge-type">${esc(anime.type)}</span>`:''}
+          ${epBadge}${totBadge}
+          ${anime.rank?`<span class="badge badge-rank">#${anime.rank}</span>`:''}
+        </div>
+        <div class="studio-line">${L('studio')}: ${esc(studios)}</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-title">${L('schedule')}</div>
+        <div class="schedule-grid">
+          <div class="schedule-cell">
+            <div class="cell-label">${L('day')}</div>
+            <div class="cell-time">${bc.localDayShort||'—'}</div>
+            <div class="cell-day">${bc.localDay||'—'}</div>
+          </div>
+          <div class="schedule-cell">
+            <div class="cell-label">${L('time')} (${localTZName})</div>
+            <div class="cell-time">${bc.localTime||'—'}</div>
+          </div>
+        </div>
+      </div>
+      ${bc.nextAirUTC?`
+      <div>
+        <div class="section-title">${L('countdown')}</div>
+        <div class="modal-countdown">
+          <div class="modal-countdown-label">${L('timeLeft')}</div>
+          <div class="modal-countdown-timer" id="modal-timer">—</div>
+        </div>
+      </div>`:''}
+      ${rawGenres.length?`
+      <div>
+        <div class="section-title">${L('genres')}</div>
+        <div class="genres-wrap" id="modal-genres">${buildGenreHtml(rawGenres)}</div>
+      </div>`:''}
+      <div>
+        <div class="section-title">${L('synopsis')}</div>
+        <div class="modal-synopsis" id="modal-synopsis">${lang==='ar'?`<span class="translating">${L('translating')}</span>`:esc(rawSynopsis||'—')}</div>
+      </div>
+      <div><a class="mal-link" href="${esc(anime.url)}" target="_blank" rel="noopener">${L('viewMal')}</a></div>
+      <div id="nyaa-panel-wrap"></div><!-- admin only, controlled by JS -->
+    </div>`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+
+  // Countdown
+  if (bc.nextAirUTC) {
+    const airUTC = bc.nextAirUTC;
+    function tickM() {
+      const el = document.getElementById('modal-timer');
+      if (!el) { clearInterval(modalCdInterval); return; }
+      const {text,cls} = cdStr(airUTC);
+      el.textContent=text; el.className='modal-countdown-timer '+cls;
+    }
+    tickM(); modalCdInterval = setInterval(tickM, 1000);
+  }
+
+  // Load episode magnets for all users (data stored by admin in KV)
+  {
+    const wrap = document.getElementById('nyaa-panel-wrap');
+    if (wrap) wrap.innerHTML = `<div class="nyaa-panel"><div class="nyaa-status" style="color:var(--muted);font-size:0.68rem;padding:12px 16px">جارٍ تحميل روابط التحميل…</div></div>`;
+    loadEpMagnets(malId).then(episodes => buildEpPanel(malId, episodes));
+  }
+
+  // Translate if Arabic
+  if (lang === 'ar') {
+    const cached = txCache[malId];
+    if (cached) {
+      const sEl = document.getElementById('modal-synopsis');
+      const gEl = document.getElementById('modal-genres');
+      if (sEl) sEl.textContent = cached.synopsis;
+      if (gEl) gEl.innerHTML   = buildGenreHtml(cached.genres);
+      return;
+    }
+
+    // Call /translate
+    const sEl = document.getElementById('modal-synopsis');
+    const gEl = document.getElementById('modal-genres');
+    try {
+      const res = await fetch('/translate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ genres: rawGenres, synopsis: rawSynopsis, targetLang: 'ar' })
+      });
+
+      // Read raw text first so we can show it if JSON parse fails
+      const rawText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseErr) {
+        // Show the raw response so user can diagnose
+        if (sEl) sEl.innerHTML = `<span class="translate-error">⚠ Server returned invalid JSON:<br><code style="font-size:0.7rem;word-break:break-all">${esc(rawText.slice(0,400))}</code></span>`;
+        if (gEl) gEl.innerHTML = buildGenreHtml(rawGenres);
+        return;
+      }
+
+      if (!res.ok || !data.ok || data.error) {
+        const msg = data.error || 'HTTP ' + res.status;
+        if (sEl) sEl.innerHTML = `<span class="translate-error">⚠ ${esc(msg)}</span><br><span style="opacity:.7">${esc(rawSynopsis)}</span>`;
+        if (gEl) gEl.innerHTML = buildGenreHtml(rawGenres);
+        return;
+      }
+
+      const arGenres   = Array.isArray(data.genres) && data.genres.length === rawGenres.length
+                         ? data.genres : rawGenres;
+      const arSynopsis = data.synopsis || rawSynopsis;
+
+      txCache[malId] = { genres: arGenres, synopsis: arSynopsis };
+      if (sEl) sEl.textContent = arSynopsis;
+      if (gEl) gEl.innerHTML   = buildGenreHtml(arGenres);
+
+    } catch (fetchErr) {
+      if (sEl) sEl.innerHTML = `<span class="translate-error">⚠ Network error: ${esc(fetchErr.message)}</span><br><span style="opacity:.7">${esc(rawSynopsis)}</span>`;
+      if (gEl) gEl.innerHTML = buildGenreHtml(rawGenres);
+    }
+  }
+}
+
+
+
+// ── Episode magnets (public read from KV via /magnets) ───────────────────────
+const epMagnetCache = {}; // mal_id → { ep: result }
+
+async function loadEpMagnets(malId) {
+  if (epMagnetCache[malId] !== undefined) return epMagnetCache[malId];
+  try {
+    const r = await fetch(`/magnets?mal_id=${malId}`);
+    const j = await r.json();
+    epMagnetCache[malId] = j.ok ? (j.episodes || {}) : {};
+  } catch(_) {
+    epMagnetCache[malId] = {};
+  }
+  return epMagnetCache[malId];
+}
+
+function eHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildEpPanel(malId, episodes) {
+  const wrap = document.getElementById('nyaa-panel-wrap');
+  if (!wrap) return;
+
+  const keys = Object.keys(episodes).sort((a,b) => parseInt(a)-parseInt(b));
+
+  if (!keys.length) {
+    wrap.innerHTML = `<div class="nyaa-panel"><div class="nyaa-status" style="color:var(--muted);font-size:0.7rem;padding:14px 16px">لا توجد روابط تحميل متاحة بعد</div></div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="nyaa-panel">
+      <div class="nyaa-panel-head">
+        <span class="nyaa-panel-title">↓ روابط التحميل</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--muted)">${keys.length} حلقة</span>
+      </div>
+      <div class="nyaa-ep-grid">
+        ${keys.map(ep => {
+          const r = episodes[ep];
+          const mag = eHtml(r.magnet || '');
+          return `<div class="nyaa-ep-card has-result">
+            <div class="nyaa-ep-num">EP ${String(ep).padStart(2,'0')}</div>
+            <div class="nyaa-ep-status found">
+              <div class="nyaa-ep-tags">
+                ${r.isArabic ? `<span class="nyaa-tag nyaa-tag-ar">عربي</span>` : ''}
+                ${r.resolution === '1080p' ? `<span class="nyaa-tag nyaa-tag-res">1080p</span>` : ''}
+              </div>
+              <div class="nyaa-ep-btns">
+                <a class="nyaa-magnet-open" href="${mag}">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  تحميل
+                </a>
+                <button class="nyaa-magnet-copy" data-magnet="${mag}">نسخ</button>
+                <button class="nyaa-play-btn" data-malid="${malId}" data-ep="${ep}" data-magnet="${eHtml(r.magnet||'')}">▶ تشغيل</button>
+                <span class="nyaa-progress" id="prog-${malId}-${ep}"></span>
+                ${isAdmin()?`<button class="nyaa-del-btn" data-malid="${malId}" data-ep="${ep}" title="حذف من الخادم">🗑</button>`:''}
+              </div>
+      </div>
+    </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  // Wire copy buttons
+  wrap.querySelectorAll('.nyaa-magnet-copy').forEach(btn => {
+    btn.addEventListener('click', function() {
+      navigator.clipboard.writeText(this.dataset.magnet).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = this.dataset.magnet; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      });
+      this.textContent = '✓';
+      setTimeout(() => { this.textContent = 'نسخ'; }, 1800);
+    });
+  });
+}
+
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  if (modalCdInterval) { clearInterval(modalCdInterval); modalCdInterval=null; }
+  nyaaVisible = false; nyaaAllItems = []; nyaaPage = 1;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  ['stats-bar','controls','day-nav'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+  document.getElementById('loading').style.display   = 'flex';
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('anime-grid').innerHTML    = '';
+  if (cdInterval) { clearInterval(cdInterval); cdInterval=null; }
+
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+
+  // Force-refresh: clear cache then reload
+  const isForceRefresh = btn.dataset.force === '1';
+  if (isForceRefresh) { localStorage.removeItem(CACHE_KEY); btn.dataset.force = '0'; }
+
+  try {
+    allAnime = await fetchSeasonal();
+
+    const now=new Date(), mo=now.getMonth()+1, yr=now.getFullYear();
+    const season = SEASONS[mo];
+    document.getElementById('season-label').textContent =
+      lang==='ar' ? `${SEASONS_AR[season]||season} ${yr}` : `${season} ${yr}`;
+
+    const scores = allAnime.filter(a=>a.score).map(a=>a.score);
+    const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2) : '—';
+    const soon = allAnime.filter(a => {
+      const bc=convertBC(getDayKey(a),getJstTime(a));
+      return bc.nextAirUTC && (bc.nextAirUTC-Date.now()) < 1800000 && (bc.nextAirUTC-Date.now()) >= 0;
+    }).length;
+
+    document.getElementById('stat-total').textContent  = allAnime.length;
+    document.getElementById('stat-airing').textContent = soon;
+    document.getElementById('stat-avg').textContent    = avg;
+
+    // Show cache age if served from cache
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (raw) {
+      try {
+        const age = Math.round((Date.now() - JSON.parse(raw).ts) / 60000);
+        const label = document.getElementById('season-label');
+        if (label) label.title = `Cached ${age}m ago — click refresh to force update`;
+      } catch(_) {}
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    ['stats-bar','controls','day-nav'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='flex'; });
+
+    const today = todayJstKey();
+    currentDay = allAnime.some(a=>getDayKey(a)===today) ? today : 'all';
+
+    renderDayNav();
+    renderGrid();
+    applyLang();
+    loadCardKeywords();
+    applyAdminUI();
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('loading').style.display   = 'none';
+    document.getElementById('error-msg').style.display = 'block';
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ── Admin system ─────────────────────────────────────────────────────────────
+// Change this password to whatever you want:
+const ADMIN_PASSWORD = 'alkare2000';
+const ADMIN_SESSION_KEY = 'animenow_admin';
+
+function isAdmin() {
+  return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+}
+
+function adminLogin(pw) {
+  if (pw === ADMIN_PASSWORD) {
+    sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+    sessionStorage.setItem('animenow_admin_pw', pw);
+    applyAdminUI();
+    return true;
+  }
+  return false;
+}
+
+function adminLogout() {
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  sessionStorage.removeItem('animenow_admin_pw');
+  applyAdminUI();
+  // Close any open modal so nyaa panel disappears
+  closeModal();
+}
+
+function applyAdminUI() {
+  const loggedIn = isAdmin();
+  // Show/hide refresh button
+  const refreshBtn = document.getElementById('refresh-btn');
+  const logoutBtn  = document.getElementById('admin-logout-btn');
+  if (refreshBtn) refreshBtn.style.display = loggedIn ? '' : 'none';
+  if (logoutBtn)  logoutBtn.style.display  = loggedIn ? '' : 'none';
+}
+
+function showAdminModal() {
+  const overlay = document.getElementById('admin-overlay');
+  const input   = document.getElementById('admin-pw-input');
+  const errEl   = document.getElementById('admin-pw-error');
+  overlay.style.display = 'flex';
+  input.value = '';
+  if (errEl) errEl.textContent = '';
+  setTimeout(() => input.focus(), 80);
+}
+
+function hideAdminModal() {
+  document.getElementById('admin-overlay').style.display = 'none';
+}
+
+// Triple-click on the season label to open admin login
+let adminClickCount = 0, adminClickTimer = null;
+document.addEventListener('click', e => {
+  if (e.target.closest('#season-label')) {
+    adminClickCount++;
+    clearTimeout(adminClickTimer);
+    adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 600);
+    if (adminClickCount >= 3) {
+      adminClickCount = 0;
+      clearTimeout(adminClickTimer);
+      if (isAdmin()) adminLogout();
+      else showAdminModal();
+    }
+  }
+});
+
+document.getElementById('admin-pw-submit').addEventListener('click', () => {
+  const pw  = document.getElementById('admin-pw-input').value;
+  const err = document.getElementById('admin-pw-error');
+  if (adminLogin(pw)) {
+    hideAdminModal();
+  } else {
+    err.textContent = 'كلمة المرور خاطئة';
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-input').focus();
+  }
+});
+
+document.getElementById('admin-pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('admin-pw-submit').click();
+  if (e.key === 'Escape') hideAdminModal();
+});
+
+document.getElementById('admin-pw-cancel').addEventListener('click', hideAdminModal);
+document.getElementById('admin-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('admin-overlay')) hideAdminModal();
+});
+
+document.getElementById('admin-logout-btn').addEventListener('click', adminLogout);
+
+// Apply admin UI state on page load
+applyAdminUI();
+
+// ── Card keyword loading + update logic ──────────────────────────────────────
+async function loadCardKeywords() {
+  for (const a of allAnime) {
+    try {
+      const r = await fetch(`/magnets?mal_id=${a.mal_id}`);
+      const j = await r.json();
+      if (j.ok && j.keyword) {
+        const inp = document.getElementById('kwi-' + a.mal_id);
+        if (inp) inp.value = j.keyword;
+      }
+    } catch {}
+  }
+}
+
+// ── Rate limit helper (1/hour per malId) ──────────────────────────────────────
+function checkRateLimit(malId) {
+  const key = 'update_ratelimit_' + malId;
+  const last = parseInt(localStorage.getItem(key) || '0');
+  if (last && Date.now() - last < 3600000) {
+    const remaining = Math.ceil((3600000 - (Date.now() - last)) / 60000);
+    return { allowed: false, msg: `الرجاء الانتظار ${remaining} دقيقة` };
+  }
+  return { allowed: true };
+}
+function setRateLimit(malId) {
+  localStorage.setItem('update_ratelimit_' + malId, String(Date.now()));
+}
+
+// Wire update buttons (delegated via grid click)
+document.getElementById('anime-grid').addEventListener('click', async e => {
+  const btn = e.target.closest('.card-update-btn');
+  if (!btn) return;
+  const malId = parseInt(btn.dataset.malid);
+  if (!malId) return;
+
+  // Rate limit check
+  const rl = checkRateLimit(malId);
+  if (!rl.allowed) {
+    const prog = document.getElementById('prog-' + malId);
+    if (prog) prog.textContent = rl.msg;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'جاري...';
+  const prog = document.getElementById('prog-' + malId);
+  const inp = document.getElementById('kwi-' + malId);
+  if (!inp) { btn.disabled = false; btn.textContent = '⟳ تحديث'; return; }
+
+  const keyword = inp.value.trim();
+  if (!keyword) { btn.disabled = false; btn.textContent = '⟳ تحديث'; return; }
+
+  // Save keyword to KV (no auth needed)
+  try { await fetch('/magnets', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ mal_id:malId, keyword }) }); } catch {}
+
+  const anime = allAnime.find(a => a.mal_id === malId);
+  const totalEps = anime?.episodes || anime?.aired_episodes || 0;
+  if (!totalEps) { btn.disabled = false; btn.textContent = '⟳ تحديث'; if(prog) prog.textContent = 'عدد الحلقات غير معروف'; return; }
+
+  // Load current saved episodes from KV
+  let saved = {};
+  try {
+    const r = await fetch(`/magnets?mal_id=${malId}`);
+    const j = await r.json();
+    if (j.ok) saved = j.episodes || {};
+  } catch {}
+
+  let found = 0, missing = 0;
+  for (let ep = 1; ep <= totalEps; ++ep) {
+    const epStr = String(ep).padStart(2, '0');
+    if (saved[epStr]) { found++; continue; }
+    if (prog) prog.textContent = `EP ${epStr}...`;
+    try {
+      const m = keyword.match(/^(.*E)([0-9]+)$/i);
+      const q = m ? m[1] + epStr : keyword + epStr;
+      const r = await fetch(`/tosho?q=${encodeURIComponent(q)}&limit=10`);
+      const j = await r.json();
+      const items = (j.ok && j.items) ? j.items.filter(i => i.magnet && i.resolution === '1080p' && i.isArabic) : [];
+      if (items.length) {
+        items.sort((a,b) => (b.seeders||0) - (a.seeders||0));
+        const best = items[0];
+        await fetch('/magnets', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+          mal_id: malId, ep: epStr,
+          result: { magnet: best.magnet, title: best.title, resolution: best.resolution, isArabic: true, seeders: best.seeders, subtitleUrl: best.subtitleUrl || '' },
+        })});
+        found++;
+      } else {
+        if (prog) prog.textContent = `EP ${epStr} غير متوفر — توقف`;
+        break;
+      }
+    } catch { break; }
+  }
+  btn.disabled = false;
+  btn.textContent = '⟳ تحديث';
+  if (prog) prog.textContent = `تم العثور على ${found} حلقة`;
+  setRateLimit(malId);
+});
+
+// ── VPS streaming ──────────────────────────────────────────────────────────────
+const VPS_URL = ''; // Empty = same origin (frontend + VPS are same server)
+
+async function checkVpsStatus(malId, ep) {
+  try {
+    const r = await fetch(`${VPS_URL}/api/status/${malId}/${ep}`);
+    return await r.json();
+  } catch { return { status: 'error', progress: 0 }; }
+}
+
+async function startVpsDownload(malId, ep, magnet) {
+  try {
+    await fetch(`${VPS_URL}/api/download`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ malId, ep, magnet })
+    });
+  } catch {}
+}
+
+function playHls(malId, ep) {
+  const videoUrl = `${VPS_URL}/hls/${malId}:${ep}/playlist.m3u8`;
+  const video = document.getElementById('player-video');
+  video.src = videoUrl;
+
+  // Try loading SRT subtitles
+  const srtUrl = `${VPS_URL}/hls/${malId}:${ep}/subs.srt`;
+  fetch(srtUrl, { method: 'HEAD' }).then(r => {
+    if (r.ok) {
+      const track = document.createElement('track');
+      track.kind = 'subtitles'; track.label = 'العربية'; track.srclang = 'ar';
+      track.src = srtUrl;
+      video.appendChild(track);
+      setTimeout(() => { if (video.textTracks?.length) video.textTracks[0].mode = 'showing'; }, 500);
+    }
+  }).catch(() => {});
+
+  document.getElementById('player-overlay').classList.add('open');
+  video.play().catch(() => {});
+}
+
+async function deleteEpisode(malId, ep) {
+  if (!isAdmin()) return;
+  const pw = sessionStorage.getItem('animenow_admin_pw') || '';
+  try {
+    const r = await fetch(`${VPS_URL}/api/episode/${malId}/${ep}`, {
+      method: 'DELETE',
+      headers: { 'X-Admin-Token': pw }
+    });
+    if (r.ok) {
+      // Refresh the episode panel
+      const malIdInt = parseInt(malId);
+      loadEpMagnets(malIdInt).then(eps => buildEpPanel(malIdInt, eps));
+    }
+  } catch {}
+}
+
+// ── Wire up ALL events here — no inline onclicks anywhere ────────────────────
+document.getElementById('btn-en').addEventListener('click', () => setLang('en'));
+document.getElementById('btn-ar').addEventListener('click', () => setLang('ar'));
+// Single click → use cache if fresh; double-click → force clear cache + refetch
+let refreshClickTimer = null;
+document.getElementById('refresh-btn').addEventListener('click', function() {
+  if (refreshClickTimer) {
+    // Double-click: force refresh
+    clearTimeout(refreshClickTimer);
+    refreshClickTimer = null;
+    this.dataset.force = '1';
+    init();
+  } else {
+    refreshClickTimer = setTimeout(() => {
+      refreshClickTimer = null;
+      init(); // normal — uses cache if fresh
+    }, 300);
+  }
+});
+document.getElementById('try-again-btn').addEventListener('click', init);
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target===document.getElementById('modal-overlay')) closeModal(); });
+
+// Player close
+document.getElementById('player-close').addEventListener('click', () => {
+  const video = document.getElementById('player-video');
+  video.pause(); video.src = '';
+  document.getElementById('player-overlay').classList.remove('open');
+});
+document.getElementById('player-overlay').addEventListener('click', e => {
+  if (e.target.id === 'player-overlay') {
+    const video = document.getElementById('player-video');
+    video.pause(); video.src = '';
+    document.getElementById('player-overlay').classList.remove('open');
+  }
+});
+document.getElementById('anime-grid').addEventListener('click', e => {
+  if (e.target.closest('.card-update-btn') || e.target.closest('.card-kw-input')) return;
+  const card = e.target.closest('.anime-card');
+  if (card && card.dataset.malid) openModal(parseInt(card.dataset.malid));
+});
+document.getElementById('search-input').addEventListener('input', e => { searchQ=e.target.value.toLowerCase().trim(); renderGrid(); });
+document.getElementById('sort-select').addEventListener('change', e => { sortMode=e.target.value; renderGrid(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+// VPS play button (delegated via modal)
+document.getElementById('modal-overlay').addEventListener('click', async e => {
+  const btn = e.target.closest('.nyaa-play-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  const malId = btn.dataset.malid, ep = btn.dataset.ep, magnet = btn.dataset.magnet;
+  if (!malId || !ep) return;
+
+  const status = await checkVpsStatus(malId, ep);
+  if (status.status === 'ready') {
+    playHls(malId, ep);
+    return;
+  }
+
+  if (status.status === 'not_found') {
+    btn.textContent = 'جاري...';
+    btn.classList.add('loading');
+    await startVpsDownload(malId, ep, magnet);
+    const progEl = document.getElementById(`prog-${malId}-${ep}`);
+
+    // Open WebSocket for real-time progress
+    const wsUrl = VPS_URL.replace(/^http/, 'ws') + '/ws';
+    let ws;
+    try { ws = new WebSocket(wsUrl); } catch {}
+    if (ws) {
+      ws.onopen = () => ws.send(JSON.stringify({ type: 'subscribe', key: `${malId}:${ep}` }));
+      ws.onmessage = msg => {
+        try {
+          const d = JSON.parse(msg.data);
+          if (progEl) {
+            if (d.status === 'downloading') progEl.textContent = `${d.progress.toFixed(1)}%`;
+            else if (d.status === 'ready') {
+              progEl.textContent = 'جاهز ✓';
+              btn.textContent = '▶ تشغيل';
+              btn.classList.remove('loading');
+              btn.classList.add('done');
+            }
+            else if (d.status === 'error') progEl.textContent = 'خطأ';
+          }
+        } catch {}
+      };
+      ws.onclose = () => { ws = null; };
+    }
+
+    // Also poll as fallback
+    const poll = setInterval(async () => {
+      const s = await checkVpsStatus(malId, ep);
+      if (s.status === 'ready') {
+        clearInterval(poll);
+        progEl.textContent = 'جاهز ✓';
+        btn.textContent = '▶ تشغيل';
+        btn.classList.remove('loading');
+        btn.classList.add('done');
+      } else if (s.status === 'downloading' && progEl && !ws) {
+        progEl.textContent = `${s.progress.toFixed(1)}%`;
+      }
+    }, 3000);
+  } else if (status.status === 'downloading') {
+    btn.textContent = 'جاري...';
+    btn.classList.add('loading');
+  }
+});
+
+// VPS delete button (admin only)
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  const btn = e.target.closest('.nyaa-del-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  if (!isAdmin()) return;
+  deleteEpisode(btn.dataset.malid, btn.dataset.ep);
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+applyLang();
+init();
+
+}); // end DOMContentLoaded
+</script>
+<div id="player-overlay">
+  <div id="player-wrap">
+    <button id="player-close">✕</button>
+    <video id="player-video" controls autoplay playsinline></video>
+  </div>
+  <div id="player-status">جاري التحميل...</div>
+</div>
+<!-- Admin login modal -->
+</body>
+</html>
